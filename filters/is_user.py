@@ -1,8 +1,17 @@
 from aiogram.types import Message
 from aiogram.dispatcher.filters import BoundFilter
 from config.config import ADMINS
+from data import db_session
+from data.users import User
 
 
 class IsUser(BoundFilter):
     async def check(self, message: Message):
-        return message.from_user.id not in ADMINS
+        db_sess = db_session.create_session()
+        return message.from_user.id not in set([user.tg_id for user in db_sess.query(User).all()])
+
+
+class IsBlackListUser(BoundFilter):
+    async def check(self, message: Message):
+        db_sess = db_session.create_session()
+        return message.from_user.id in set([user.tg_id for user in db_sess.query(User).all()])
