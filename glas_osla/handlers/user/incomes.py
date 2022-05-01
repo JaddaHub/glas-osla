@@ -15,5 +15,5 @@ async def add_to_history(message: types.Message):
     await message.answer(" ".join(arguments))
 
 
-def setup_expenses_handlers(dp: Dispatcher):
-    dp.register_message_handler(add_to_history, ClientFilter(True), commands='-')
+def setup_revenues_handlers(dp: Dispatcher):
+    dp.register_message_handler(add_to_history, ClientFilter(True), commands='+')

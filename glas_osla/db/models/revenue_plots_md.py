@@ -2,16 +2,16 @@ import sqlalchemy
 from glas_osla.db.base import Base
 
 
-class ExpenseCategory(Base):
-    __tablename__ = 'expenses_categories'
+class RevenueCategory(Base):
+    __tablename__ = 'revenues_categories'
 
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True, unique=True)
     user_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('users.id'))
     name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
 
 
-class ExpenseSubCategory(Base):
-    __tablename__ = 'expenses_subcategories'
+class RevenueSubCategory(Base):
+    __tablename__ = 'revenues_subcategories'
 
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True, unique=True,
                            nullable=False)
