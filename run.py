@@ -1,23 +1,48 @@
-from handlers import *
-from aiogram import Bot, Dispatcher, executor
-from loader import bot, storage, dp
-from data import db_session
+import asyncio
+import os
+from glas_osla.data import config
+from glas_osla.handlers import *
+from glas_osla.filters import *
+from glas_osla.db import base
+from aiogram import executor
+from aiogram import Bot, Dispatcher
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
+import logging
+
+logger = logging.getLogger(__name__)
 
 
-def start():
+async def register_all_handlers(dp):
     setup_registration_handlers(dp)
     setup_admin_moderation_handlers(dp)
-    db_session.global_init()
+    setup_expenses_handlers(dp)
+    setup_profile_handlers(dp)
 
 
-def close():
-    bot.close()
-    storage.close()
+async def register_all_filters(dp):
+    dp.filters_factory.bind(AdminFilter)
+    dp.filters_factory.bind(ClientFilter)
+
+
+async def main():
+    logging.basicConfig(format=u'%(filename)s [LINE:%(lineno)d] #%(levelname)-8s [%(asctime)s]  %(message)s',
+                        level=logging.INFO)
+    bot = Bot(token=config.BOT_TOKEN)
+    storage = MemoryStorage()
+    dp = Dispatcher(bot, storage=storage)
+
+    await base.init_models()
+
+    await register_all_handlers(dp)
+    await register_all_filters(dp)
+
+    try:
+        executor.start_polling(dp)
+    finally:
+        await dp.storage.close()
+        await dp.storage.wait_closed()
+        await bot.session.close()
 
 
 if __name__ == '__main__':
-    try:
-        start()
-        executor.start_polling(dp)
-    finally:
-        close()
+    asyncio.run(main())
