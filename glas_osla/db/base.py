@@ -2,10 +2,9 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import sessionmaker
+from glas_osla.data.config import PG_URL
 
-DATABASE_URL = "postgresql+asyncpg://postgres:postgres@localhost/asyncalchemy"
-
-engine = create_async_engine(DATABASE_URL, echo=True)
+engine = create_async_engine(PG_URL, echo=False)
 Base = declarative_base()
 async_session = sessionmaker(
     engine, class_=AsyncSession, expire_on_commit=False

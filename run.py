@@ -12,14 +12,14 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-async def register_all_handlers(dp):
+def register_all_handlers(dp):
     setup_registration_handlers(dp)
     setup_admin_moderation_handlers(dp)
     setup_expenses_handlers(dp)
     setup_profile_handlers(dp)
 
 
-async def register_all_filters(dp):
+def register_all_filters(dp):
     dp.filters_factory.bind(AdminFilter)
     dp.filters_factory.bind(ClientFilter)
 
@@ -31,13 +31,12 @@ async def main():
     storage = MemoryStorage()
     dp = Dispatcher(bot, storage=storage)
 
-    await base.init_models()
-
-    await register_all_handlers(dp)
-    await register_all_filters(dp)
+    # await base.init_models()
+    register_all_filters(dp)
+    register_all_handlers(dp)
 
     try:
-        executor.start_polling(dp)
+        await dp.start_polling()
     finally:
         await dp.storage.close()
         await dp.storage.wait_closed()

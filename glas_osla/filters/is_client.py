@@ -8,11 +8,11 @@ import typing
 class ClientFilter(BoundFilter):
     key = 'is_client'
 
-    def __init__(self, is_client: typing.Optional[bool] = None):
+    def __init__(self, is_client):
         self.is_client = is_client
 
     async def check(self, obj):
         if self.is_client is None:
             return False
-        db_sess = await get_session()
-        return (obj.from_user.id in set([user.tg_id for user in db_sess.query(User).all()])) == self.is_client
+        async with get_session() as db_sess:
+            return (obj.from_user.id in set([user.tg_id for user in db_sess.query(User).all()])) == self.is_client
