@@ -1,10 +1,9 @@
 import asyncio
-import os
 from glas_osla.data import config
+from glas_osla.db import __all_models
+from glas_osla.db import base
 from glas_osla.handlers import *
 from glas_osla.filters import *
-from glas_osla.db import base
-from aiogram import executor
 from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 import logging
@@ -31,7 +30,7 @@ async def main():
     storage = MemoryStorage()
     dp = Dispatcher(bot, storage=storage)
 
-    # await base.init_models()
+    await base.init_models()
     register_all_filters(dp)
     register_all_handlers(dp)
 
@@ -44,4 +43,7 @@ async def main():
 
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except (KeyboardInterrupt, SystemExit):
+        logger.error("Bot stopped!")

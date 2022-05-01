@@ -1,5 +1,6 @@
 from aiogram.dispatcher import Dispatcher
 from aiogram import types
+from glas_osla.filters.is_client import ClientFilter
 
 
 async def add_to_history(message: types.Message):
@@ -8,4 +9,4 @@ async def add_to_history(message: types.Message):
 
 
 def setup_expenses_handlers(dp: Dispatcher):
-    dp.register_message_handler(add_to_history, is_client=True, commands='-')
+    dp.register_message_handler(add_to_history, ClientFilter(True), commands='-')

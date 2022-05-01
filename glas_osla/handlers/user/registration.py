@@ -4,8 +4,8 @@ from aiogram.dispatcher import FSMContext, Dispatcher
 from aiogram import types
 from glas_osla.templates.registration_phrases import *
 from glas_osla.states.RegStates import RegistrationStates
-from glas_osla.db.users import User
-from glas_osla.db.base import get_session
+from glas_osla.db.models.users_md import User
+from glas_osla.db.base import async_session
 
 
 async def warn_to_reg(message: types.Message):
@@ -32,9 +32,10 @@ async def get_person_type(message: types.Message, state: FSMContext):
     new_user.tg_id = message.from_user.id
     new_user.name = (await state.get_data())['client_name']
     new_user.person_type = message.text
-    async with get_session() as db_sess:
-        db_sess.add(new_user)
-        db_sess.commit()
+    async with async_session() as db_sess:
+        async with db_sess.begin():
+            db_sess.add(new_user)
+        await db_sess.commit()
     logging.info(f"{new_user} добавлен!")
     await message.answer(thanks)
     await state.finish()

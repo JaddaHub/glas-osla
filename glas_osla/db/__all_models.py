@@ -1,3 +1,3 @@
-from . import users
-from . import expenses
-from . import expenses_plots
+from .models import expenses_md
+from .models import expenses_plots_md
+from .models import users_md

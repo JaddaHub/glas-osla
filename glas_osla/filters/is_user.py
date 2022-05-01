@@ -1,7 +1,7 @@
 from aiogram.types import Message
 from aiogram.dispatcher.filters import BoundFilter
 from ..db import db_session
-from glas_osla.db.users import User
+from glas_osla.db.models.users import User
 
 
 class IsUser(BoundFilter):
