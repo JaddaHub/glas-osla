@@ -9,17 +9,19 @@ from glas_osla.keyboards.inline import keyboards
 from sqlalchemy import select
 
 
-async def profile(message: types.Message):
+async def profile(callback: types.CallbackQuery):
     async with async_session() as db_sess:
         query = select(User.tg_id, User.name, User.person_type, User.created_date).where(
-            User.tg_id == message.from_user.id)
+            User.tg_id == callback.from_user.id)
         data = map(str, (await db_sess.execute(query)).first())
-    await message.answer(f"Информация о вас:\n{' '.join(data)}")
+    await callback.message.answer(f"Информация о вас:\n{' '.join(data)}",
+                                  reply_markup=keyboards.profile_keyboard)
 
 
 async def show_menu(message: types.Message):
     user_nickname = await db_commands.get_user_nickname(message.from_user.id)
-    await message.answer(general_phrases.menu_text.format(user_nickname), reply_markup=keyboards.menu_keyboard)
+    await message.answer(general_phrases.menu_text.format(user_nickname),
+                         reply_markup=keyboards.menu_keyboard)
 
 
 async def show_quick_info(message: types.Message):
@@ -31,8 +33,14 @@ async def show_expenses_categories(callback: types.CallbackQuery):
     await callback.message.answer("Ваши категории у расходов", reply_markup=expenses_keyboard)
 
 
+async def show_revenues_categories(callback: types.CallbackQuery):
+    revenues_keyboard = await keyboards.revenues_categories_keyboard(callback.from_user.id)
+    await callback.message.answer('Ваши категории у доходов', reply_markup=revenues_keyboard)
+
+
 def setup_general_handlers(dp: Dispatcher):
-    dp.register_message_handler(profile, ClientFilter(True), commands='profile')
     dp.register_message_handler(show_menu, ClientFilter(True), commands='menu')
     dp.register_message_handler(show_quick_info, ClientFilter(True), commands='quick')
+    dp.register_callback_query_handler(profile, ClientFilter(True), text='get_profile')
     dp.register_callback_query_handler(show_expenses_categories, text='get_expenses')
+    dp.register_callback_query_handler(show_revenues_categories, text='get_revenues')

@@ -22,7 +22,8 @@ async def get_user_nickname(message_author_id):
 async def get_user_expenses_categories(message_author_id):
     user_db_id = await get_user_db_id(message_author_id)
     async with async_session() as db_sess:
-        cat_query = select(ExpenseCategory.id, ExpenseCategory.name).where(ExpenseCategory.user_id == user_db_id)
+        cat_query = select(ExpenseCategory.id, ExpenseCategory.name).where(
+            ExpenseCategory.user_id == user_db_id)
         categories = (await db_sess.execute(cat_query)).all()
         return categories
 
@@ -39,7 +40,8 @@ async def get_user_expenses_subcategories(message_author_id):
 async def get_user_revenues_categories(message_author_id):
     user_db_id = await get_user_db_id(message_author_id)
     async with async_session() as db_sess:
-        cat_query = select(RevenueCategory.id, RevenueCategory.name).where(RevenueCategory.user_id == user_db_id)
+        cat_query = select(RevenueCategory.id, RevenueCategory.name).where(
+            RevenueCategory.user_id == user_db_id)
         categories = (await db_sess.execute(cat_query)).all()
         return categories
 
