@@ -16,7 +16,7 @@ def register_all_handlers(dp):
     setup_admin_moderation_handlers(dp)
     setup_expenses_handlers(dp)
     setup_revenues_handlers(dp)
-    setup_profile_handlers(dp)
+    setup_general_handlers(dp)
 
 
 def register_all_filters(dp):
@@ -32,7 +32,7 @@ async def main():
     storage = MemoryStorage()
     dp = Dispatcher(bot, storage=storage)
 
-    # await base.init_models()
+    #await base.init_models()
     register_all_filters(dp)
     register_all_handlers(dp)
 

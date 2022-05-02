@@ -6,6 +6,7 @@ from glas_osla.templates.registration_phrases import *
 from glas_osla.states.RegStates import RegistrationStates
 from glas_osla.db.models.users_md import User
 from glas_osla.db.base import async_session
+from glas_osla.keyboards.inline import keyboards
 
 
 async def warn_to_reg(message: types.Message):
