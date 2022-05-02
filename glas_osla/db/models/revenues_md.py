@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import sqlalchemy
 from glas_osla.db.base import Base
 from sqlalchemy import orm
@@ -13,4 +15,5 @@ class Revenue(Base):
     sub_category = sqlalchemy.Column(sqlalchemy.Integer,
                                      sqlalchemy.ForeignKey('revenues_subcategories.id'))
     amount = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
+    date = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.now())
     note = sqlalchemy.Column(sqlalchemy.String, nullable=True)

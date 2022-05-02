@@ -16,5 +16,5 @@ class RevenueSubCategory(Base):
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True, unique=True,
                            nullable=False)
     user_id = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
-    parent = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('users.id'))
+    parent = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('revenues_categories.id'))
     name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
