@@ -5,7 +5,8 @@ from glas_osla.db import db_commands
 from glas_osla.db.models.users_md import User
 from glas_osla.filters.is_client import ClientFilter
 from glas_osla.templates import general_phrases
-from glas_osla.keyboards.inline import keyboards
+from glas_osla.keyboards.inline import general_keyboards as keyboards, expenses_keyboards as ex_keyboards, \
+    revenues_keyboards as re_keyboards
 from sqlalchemy import select
 
 
@@ -29,12 +30,12 @@ async def show_quick_info(message: types.Message):
 
 
 async def show_expenses_categories(callback: types.CallbackQuery):
-    expenses_keyboard = await keyboards.expenses_categories_keyboard(callback.from_user.id)
+    expenses_keyboard = await ex_keyboards.expenses_categories_keyboard(callback.from_user.id)
     await callback.message.answer("Ваши категории у расходов", reply_markup=expenses_keyboard)
 
 
 async def show_revenues_categories(callback: types.CallbackQuery):
-    revenues_keyboard = await keyboards.revenues_categories_keyboard(callback.from_user.id)
+    revenues_keyboard = await re_keyboards.revenues_categories_keyboard(callback.from_user.id)
     await callback.message.answer('Ваши категории у доходов', reply_markup=revenues_keyboard)
 
 
@@ -57,6 +58,3 @@ def setup_general_handlers(dp: Dispatcher):
     dp.register_callback_query_handler(profile, ClientFilter(True), text='get_profile')
     dp.register_callback_query_handler(show_expenses_categories, ClientFilter(True), text='get_expenses')
     dp.register_callback_query_handler(show_revenues_categories, ClientFilter(True), text='get_revenues')
-
-    dp.register_message_handler(add_expenses_category, ClientFilter(True), commands='newcat')
-    dp.register_message_handler(add_expenses_sub_category, ClientFilter(True), commands='newsubcat')
