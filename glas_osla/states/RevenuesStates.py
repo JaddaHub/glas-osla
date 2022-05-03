@@ -1,17 +1,17 @@
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
 
-class ChangeExpensesCategoryStates(StatesGroup):
+class ChangeRevenuesCategoryStates(StatesGroup):
     new_category_name = State()
 
 
-class ChangeExpensesSubCategoryStates(StatesGroup):
+class ChangeRevenuesSubCategoryStates(StatesGroup):
     new_sub_category_name = State()
 
 
-class AddExpensesCategory(StatesGroup):
+class AddRevenuesCategory(StatesGroup):
     new_category_name = State()
 
 
-class AddExpensesSubCategory(StatesGroup):
+class AddRevenuesSubCategory(StatesGroup):
     new_sub_category_name = State()
