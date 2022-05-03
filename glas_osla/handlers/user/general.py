@@ -49,6 +49,19 @@ async def profile_back_to_menu(callback: types.CallbackQuery):
                                   reply_markup=keyboards.menu_keyboard)
 
 
+async def add_expenses_category(message: types.Message):
+    cat_name = message.text.split()[1]
+    await db_commands.add_expenses_category(message.from_user.id, cat_name)
+    await message.answer('OK, категория добавлена', reply_markup=keyboards.menu_keyboard)
+
+
+async def add_expenses_sub_category(message: types.Message):
+    sub_cat_name, parent_name = message.text.split()[1:3]
+    parent_id = await db_commands.get_expenses_category_id(parent_name)
+    await db_commands.add_expenses_sub_category(message.from_user.id, parent_id, sub_cat_name)
+    await message.answer('OK, подкатегория добавлена', reply_markup=keyboards.menu_keyboard)
+
+
 def setup_general_handlers(dp: Dispatcher):
     dp.register_message_handler(show_menu, ClientFilter(True), commands='menu')
     dp.register_message_handler(show_quick_info, ClientFilter(True), commands='quick')
@@ -59,3 +72,8 @@ def setup_general_handlers(dp: Dispatcher):
     setup_circles_diagrams_handlers(dp)
     setup_graphics_handlers(dp)
     setup_reports_handlers(dp)
+    dp.register_callback_query_handler(show_expenses_categories, ClientFilter(True), text='get_expenses')
+    dp.register_callback_query_handler(show_revenues_categories, ClientFilter(True), text='get_revenues')
+
+    dp.register_message_handler(add_expenses_category, ClientFilter(True), commands='newcat')
+    dp.register_message_handler(add_expenses_sub_category, ClientFilter(True), commands='newsubcat')
