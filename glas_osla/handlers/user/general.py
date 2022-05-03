@@ -72,8 +72,10 @@ def setup_general_handlers(dp: Dispatcher):
     setup_circles_diagrams_handlers(dp)
     setup_graphics_handlers(dp)
     setup_reports_handlers(dp)
-    dp.register_callback_query_handler(show_expenses_categories, ClientFilter(True), text='get_expenses')
-    dp.register_callback_query_handler(show_revenues_categories, ClientFilter(True), text='get_revenues')
+    dp.register_callback_query_handler(show_expenses_categories, ClientFilter(True),
+                                       text='get_expenses')
+    dp.register_callback_query_handler(show_revenues_categories, ClientFilter(True),
+                                       text='get_revenues')
 
     dp.register_message_handler(add_expenses_category, ClientFilter(True), commands='newcat')
     dp.register_message_handler(add_expenses_sub_category, ClientFilter(True), commands='newsubcat')

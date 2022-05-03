@@ -38,7 +38,7 @@ async def get_person_type(message: types.Message, state: FSMContext):
             db_sess.add(new_user)
         await db_sess.commit()
     logging.info(f"{new_user} добавлен!")
-    await message.answer(thanks)
+    await message.answer(thanks, reply_markup=keyboards.board_menu_keyboard)
     await state.finish()
 
 

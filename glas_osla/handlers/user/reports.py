@@ -1,6 +1,7 @@
 from aiogram.dispatcher import Dispatcher
 from aiogram import types
 from aiogram.types import InputFile
+
 from glas_osla.keyboards.inline import keyboards
 
 
@@ -32,8 +33,9 @@ async def current_back_to_reports(callback: types.CallbackQuery):
 
 
 def setup_reports_handlers(dp: Dispatcher):
-    dp.register_callback_query_handler(get_reports, text='get_reports')
-    dp.register_callback_query_handler(show_week_report, text='show_week_report')
-    dp.register_callback_query_handler(show_month_report, text='show_month_report')
-    dp.register_callback_query_handler(show_year_report, text='show_year_report')
-    dp.register_callback_query_handler(current_back_to_reports, text='current_back_to_reports')
+    dp.register_callback_query_handler(get_reports, is_client=True, text='get_reports')
+    dp.register_callback_query_handler(show_week_report, is_client=True, text='show_week_report')
+    dp.register_callback_query_handler(show_month_report, is_client=True, text='show_month_report')
+    dp.register_callback_query_handler(show_year_report, is_client=True, text='show_year_report')
+    dp.register_callback_query_handler(current_back_to_reports, is_client=True,
+                                       text='current_back_to_reports')

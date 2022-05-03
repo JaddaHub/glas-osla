@@ -1,6 +1,7 @@
 from aiogram.dispatcher import Dispatcher
 from aiogram import types
 from aiogram.types import InputFile
+
 from glas_osla.keyboards.inline import keyboards
 
 
@@ -32,8 +33,9 @@ async def current_back_to_graphics(callback: types.CallbackQuery):
 
 
 def setup_graphics_handlers(dp: Dispatcher):
-    dp.register_callback_query_handler(get_graphics, text='get_graphics')
-    dp.register_callback_query_handler(show_week_graphic, text='show_week_graphic')
-    dp.register_callback_query_handler(show_month_graphic, text='show_month_graphic')
-    dp.register_callback_query_handler(show_year_graphic, text='show_year_graphic')
-    dp.register_callback_query_handler(current_back_to_graphics, text='current_back_to_graphics')
+    dp.register_callback_query_handler(get_graphics, is_client=True, text='get_graphics')
+    dp.register_callback_query_handler(show_week_graphic, is_client=True, text='show_week_graphic')
+    dp.register_callback_query_handler(show_month_graphic, is_client=True, text='show_month_graphic')
+    dp.register_callback_query_handler(show_year_graphic, is_client=True, text='show_year_graphic')
+    dp.register_callback_query_handler(current_back_to_graphics, is_client=True,
+                                       text='current_back_to_graphics')
