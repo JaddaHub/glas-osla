@@ -26,7 +26,14 @@ from glas_osla.templates import general_phrases
 
 
 async def add_to_history(message: types.Message):
-    arguments = message.text.split()[1:]
+    try:
+        arguments = message.text.split()[1:]
+        if len(arguments) > 4:
+            raise IndexError
+    except IndexError:
+        await message.answer('Введены неверные аргументы\n/quick - информация о быстрой команде')
+        return
+
     if not arguments:
         await message.answer('Введите аргументы')
         return
@@ -226,3 +233,4 @@ def setup_expenses_handlers(dp: Dispatcher):
                                        filters.Text(startswith='add_e_s_c_'))
     dp.register_message_handler(get_add_sub_category_name, ClientFilter(True),
                                 state=AddExpensesSubCategory.new_sub_category_name)
+    dp.register_message_handler(add_to_history, is_client=True, commands='-')

@@ -8,7 +8,14 @@ from glas_osla.db.db_commands import quick_add_to_revenues
 
 
 async def add_to_history(message: types.Message):
-    arguments = message.text.split()[1:]
+    try:
+        arguments = message.text.split()[1:]
+        if len(arguments) > 4:
+            raise IndexError
+    except IndexError:
+        await message.answer('Введены неверные аргументы\n/quick - информация о быстрой команде')
+        return
+
     if not arguments:
         await message.answer('Введите аргументы')
         return

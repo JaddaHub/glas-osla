@@ -1,6 +1,6 @@
 import logging
 import os
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 import aiogram.dispatcher.filters.state
 from aiogram.dispatcher import Dispatcher, filters, FSMContext
@@ -17,7 +17,7 @@ from glas_osla.keyboards.inline import general_keyboards
 from glas_osla.db.db_commands import (
     get_user_in_time,
     get_category_name, get_category_name, get_sub_category_name,
-    get_sub_category_name
+    get_sub_category_name, get_user_subcategories
 )
 from glas_osla.keyboards.inline import circles_diagrams_keyboards
 from glas_osla.utils.cirlces_diagrams import draw_circle_diagram
@@ -56,25 +56,36 @@ async def show_circle_diagram(callback: types.CallbackQuery):
 
     data = None
     if data_type == 'r':
-        data = [[i[0]] + [await get_category_name(i[1], RevenueCategory)] + [
-            await get_sub_category_name(i[2], RevenueSubCategory)] for i in
-                await get_user_in_time(callback.from_user.id, time, Revenue)]
+        if category == 'all':
+            data = [[i[0]] + [await get_category_name(i[1], RevenueCategory)] + [
+                await get_sub_category_name(i[2], RevenueSubCategory)] for i in
+                    await get_user_in_time(callback.from_user.id, time, Revenue)]
+        else:
+            data = await get_user_subcategories(callback.from_user.id, int(category),
+                                                RevenueSubCategory)
     elif data_type == 'e':
-        data = [[i[0]] + [await get_category_name(i[1], ExpenseCategory)] + [
-            await get_sub_category_name(i[2], ExpenseSubCategory)] for i in
-                await get_user_in_time(callback.from_user.id, time, Expense)]
+        if category == 'all':
+            data = [[i[0]] + [await get_category_name(i[1], ExpenseCategory)] + [
+                await get_sub_category_name(i[2], ExpenseSubCategory)] for i in
+                    await get_user_in_time(callback.from_user.id, time, Expense)]
+        else:
+            data = await get_user_subcategories(callback.from_user.id, int(category),
+                                                ExpenseSubCategory)
     if not data:
         await callback.message.answer('Нет данных')
         return
-    print(callback.data)
-    print(data)
 
-    filename = f'glas_osla/resources/img/circles_diagrams/{callback.from_user.id}_{data_type}_{category}.png'
+    filename = f'glas_osla/resources/img/circles_diagrams/{callback.from_user.id}_{data_type}_{category}_{datetime.now().microsecond}.png'
 
-    draw_circle_diagram(filename, (i[1] for i in data), (i[0] for i in data))
+    await draw_circle_diagram(filename, (i[1] for i in data), (i[0] for i in data))
     photo = InputFile(filename)
-    await callback.bot.send_photo(callback.from_user.id, photo=photo, caption='Ваша диаграмма')
+    await callback.bot.send_photo(callback.from_user.id, photo=photo, caption='Ваша диаграмма',
+                                  reply_markup=circles_diagrams_keyboards.show_keyboard)
     os.remove(filename)
+
+
+async def close_circle_diagram(callback: types.CallbackQuery):
+    await callback.message.delete()
 
 
 def setup_circles_diagrams_handlers(dp: Dispatcher):
@@ -92,3 +103,4 @@ def setup_circles_diagrams_handlers(dp: Dispatcher):
     dp.register_callback_query_handler(show_circle_diagram,
                                        filters.Text(startswith='cd_show_'),
                                        is_client=True)
+    dp.register_callback_query_handler(close_circle_diagram, is_client=True, text='cd_close')

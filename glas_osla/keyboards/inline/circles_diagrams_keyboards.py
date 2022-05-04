@@ -13,6 +13,10 @@ ask_keyboard.add(InlineKeyboardButton('Расходы', callback_data=f'cd_cat_e
 ask_keyboard.add(InlineKeyboardButton('Назад', callback_data=f'get_profile'))
 
 
+async def del_last_for_back(callback: str) -> str:
+    return '_'.join(callback.split('_')[:-1])
+
+
 async def categories_keyboard(user_id, callback: str):
     if callback.split('_')[-1] == 'r':
         categories = await get_user_categories(user_id, RevenueCategory)
@@ -33,5 +37,10 @@ async def time_keyboard(callback: str):
     keyboard.add(InlineKeyboardButton('День', callback_data=f'cd_show_{callback}_d'))
     keyboard.add(InlineKeyboardButton('Неделя', callback_data=f'cd_show_{callback}_w'))
     keyboard.add(InlineKeyboardButton('Месяц', callback_data=f'cd_show_{callback}_m'))
-    keyboard.add(InlineKeyboardButton('Назад', callback_data=f'cd_cat_{callback}'))
+    keyboard.add(
+        InlineKeyboardButton('Назад', callback_data=f'cd_cat_{await del_last_for_back(callback)}'))
     return keyboard
+
+
+show_keyboard = InlineKeyboardMarkup(row_width=1)
+show_keyboard.add(InlineKeyboardButton('Закрыть', callback_data='cd_close'))

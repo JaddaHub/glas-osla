@@ -163,7 +163,7 @@ async def quick_add_to_revenues(params: dict):
     user_category = params['category']
     user_sub_category = params.get('sub_category')
 
-    categories = await get_user_categories(user_tg_id, RevenueSubCategory)
+    categories = await get_user_categories(user_tg_id, RevenueCategory)
     if not categories:
         categories = [(0, 0)]
     for id, category in categories:
