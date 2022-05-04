@@ -15,10 +15,11 @@ async def expenses_categories_keyboard(message_author_id):
 
 async def expenses_subcategories_keyboard(message_author_id, category_id):
     keyboard = InlineKeyboardMarkup(row_width=1)
-    keyboard.add(InlineKeyboardButton(text='Редактировать категорию', callback_data=f'change_e_c_{category_id}'))
+
     response = await db_commands.get_user_subcategories(message_author_id, category_id, ExpenseSubCategory)
     for row in response:
         keyboard.add(InlineKeyboardButton(text=row[1], callback_data=f"e_s_c_{row[0]}"))
+    keyboard.add(InlineKeyboardButton(text='Редактировать категорию', callback_data=f'change_e_c_{category_id}'))
     keyboard.add(InlineKeyboardButton(text='Добавить подкатегорию', callback_data=f'add_e_s_c_{category_id}'))
     keyboard.add(InlineKeyboardButton(text='Назад', callback_data='back_to_e_categories'))
     return keyboard

@@ -10,6 +10,7 @@ from .models.users_md import User
 from .models.expenses_plots_md import ExpenseCategory, ExpenseSubCategory
 from .models.revenues_plots_md import RevenueCategory, RevenueSubCategory
 from .models.revenues_md import Revenue
+from .models.expenses_md import Expense
 from .models.expenses_plots_md import ExpenseCategory, ExpenseSubCategory
 from .models.revenues_plots_md import RevenueCategory, RevenueSubCategory
 
@@ -48,7 +49,8 @@ async def get_user_subcategories(
 
 
 async def get_user_category_id_from_sub_category(
-        sub_category_id, db_model: Union[ExpenseSubCategory, RevenueSubCategory]):
+        sub_category_id,
+                                                 db_model: Union[ExpenseSubCategory, RevenueSubCategory]):
     async with async_session() as db_sess:
         cat_query = select(db_model.parent).where(db_model.id == sub_category_id)
         category_id = (await db_sess.execute(cat_query)).first()[0]
@@ -239,11 +241,35 @@ async def quick_add_to_expenses(params: dict):
     logging.info(f'запись {expenses.id} добавлена')
 
 
-async def get_user_in_time(
-        message_author_id, time: timedelta, db_model: Union[Revenue, Expense]):
+async def get_user_posts_in_time(message_author_id, time: timedelta, db_model: Union[Expense, Revenue]):
     user_db_id = await get_user_db_id(message_author_id)
     async with async_session() as db_sess:
-        db_model_cat_query = select(db_model.amount, db_model.category, db_model.sub_category).where(
+        revenues_cat_query = select(db_model.amount, db_model.category, db_model.sub_category).where(
             and_(datetime.now() - db_model.date <= time, db_model.user_id == user_db_id))
-        data = (await db_sess.execute(db_model_cat_query)).all()
+        revenues = (await db_sess.execute(revenues_cat_query)).all()
+        return revenues
+
+
+async def all_user_posts(message_author_id, db_model: Union[Expense, Revenue]):
+    user_db_id = await get_user_db_id(message_author_id)
+    async with async_session() as db_sess:
+        user_data_query = select(db_model.date, db_model.amount, db_model.category, db_model.sub_category).where(db_model.user_id == user_db_id)
+        data = (await db_sess.execute(user_data_query)).all()
+        return data
+
+
+async def get_user_current_day_post(message_author_id, current_day, db_model: Union[Expense, Revenue]):
+    user_db_id = await get_user_db_id(message_author_id)
+    async with async_session() as db_sess:
+        user_data_query = select(db_model.date, db_model.amount, db_model.category, db_model.sub_category).where(and_(db_model.user_id == user_db_id, db_model.date == current_day))
+        data = (await db_sess.execute(user_data_query)).all()
+        return data
+
+
+async def get_user_current_segment_posts(message_author_id, first_date, second_date, db_model: Union[Expense, Revenue]):
+    user_db_id = await get_user_db_id(message_author_id)
+    async with async_session() as db_sess:
+        user_data_query = select(db_model.date, db_model.amount, db_model.category, db_model.sub_category).where(
+            and_(db_model.user_id == user_db_id, db_model.date <= second_date, db_model.date >= first_date))
+        data = (await db_sess.execute(user_data_query)).all()
         return data
