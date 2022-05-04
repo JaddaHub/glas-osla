@@ -1,15 +1,9 @@
 from datetime import timedelta
 
-from aiogram.dispatcher import Dispatcher
 from aiogram import types
+from aiogram.dispatcher import Dispatcher
 from aiogram.types import InputFile
-from glas_osla.keyboards.inline import keyboards
 
-from glas_osla.db.db_commands import (
-    get_user_revenues_in_time, get_user_expenses_in_time,
-    get_revenues_category_name, get_expenses_category_name, get_revenues_sub_category_name,
-    get_expenses_sub_category_name
-)
 from glas_osla.utils.cirlces_diagrams import draw_circle_diagram
 
 

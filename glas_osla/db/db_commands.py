@@ -10,6 +10,7 @@ from .models.users_md import User
 from .models.expenses_plots_md import ExpenseCategory, ExpenseSubCategory
 from .models.revenues_plots_md import RevenueCategory, RevenueSubCategory
 from .models.revenues_md import Revenue
+from .models.expenses_md import Expense
 from .models.expenses_plots_md import ExpenseCategory, ExpenseSubCategory
 from .models.revenues_plots_md import RevenueCategory, RevenueSubCategory
 
@@ -37,7 +38,8 @@ async def get_user_categories(message_author_id, db_model: Union[ExpenseCategory
         return categories
 
 
-async def get_user_subcategories(message_author_id, category_id, db_model: Union[ExpenseSubCategory, RevenueSubCategory]):
+async def get_user_subcategories(message_author_id, category_id,
+                                 db_model: Union[ExpenseSubCategory, RevenueSubCategory]):
     user_db_id = await get_user_db_id(message_author_id)
     async with async_session() as db_sess:
         sub_cat_query = select(db_model.id, db_model.name).where(
@@ -46,7 +48,8 @@ async def get_user_subcategories(message_author_id, category_id, db_model: Union
         return sub_categories
 
 
-async def get_user_category_id_from_sub_category(sub_category_id, db_model: Union[ExpenseSubCategory, RevenueSubCategory]):
+async def get_user_category_id_from_sub_category(sub_category_id,
+                                                 db_model: Union[ExpenseSubCategory, RevenueSubCategory]):
     async with async_session() as db_sess:
         cat_query = select(db_model.parent).where(db_model.id == sub_category_id)
         category_id = (await db_sess.execute(cat_query)).first()[0]
@@ -150,7 +153,7 @@ async def quick_add_to_revenues(params: dict):
     user_category = params['category']
     user_sub_category = params.get('sub_category')
 
-    categories = await get_user_revenues_categories(user_tg_id)
+    categories = await get_user_categories(user_tg_id, RevenueCategory)
     if not categories:
         categories = [(0, 0)]
     for id, category in categories:
@@ -158,10 +161,10 @@ async def quick_add_to_revenues(params: dict):
             category_id = revenue.category = id
             break
     else:
-        await add_revenues_category(user_tg_id, user_category)
+        await add_category(user_tg_id, user_category, RevenueCategory)
         category_id = revenue.category = categories[-1][0] + 1
 
-    sub_categories = await get_user_revenues_subcategories(user_tg_id, category_id)
+    sub_categories = await get_user_subcategories(user_tg_id, category_id, RevenueSubCategory)
     if not sub_categories:
         sub_categories = [(0, 0)]
 
@@ -171,7 +174,7 @@ async def quick_add_to_revenues(params: dict):
                 revenue.sub_category = id
                 break
         else:
-            await add_revenues_sub_category(user_tg_id, category_id, user_sub_category)
+            await add_sub_category(user_tg_id, category_id, user_sub_category, RevenueSubCategory)
             revenue.sub_category = sub_categories[-1][0] + 1
 
     revenue.amount = int(params['amount'])
@@ -193,7 +196,7 @@ async def quick_add_to_expenses(params: dict):
     user_category = params['category']
     user_sub_category = params.get('sub_category')
 
-    categories = await get_user_expenses_categories(user_tg_id)
+    categories = await get_user_categories(user_tg_id, ExpenseCategory)
     if not categories:
         categories = [(0, 0)]
     for id, category in categories:
@@ -201,10 +204,10 @@ async def quick_add_to_expenses(params: dict):
             category_id = expenses.category = id
             break
     else:
-        await add_expenses_category(user_tg_id, user_category)
+        await add_category(user_tg_id, user_category, ExpenseCategory)
         category_id = expenses.category = categories[-1][0] + 1
 
-    sub_categories = await get_user_expenses_subcategories(user_tg_id, category_id)
+    sub_categories = await get_user_subcategories(user_tg_id, category_id, ExpenseSubCategory)
     if not sub_categories:
         sub_categories = [(0, 0)]
 
@@ -214,7 +217,7 @@ async def quick_add_to_expenses(params: dict):
                 expenses.sub_category = id
                 break
         else:
-            await add_expenses_sub_category(user_tg_id, category_id, user_sub_category)
+            await add_sub_category(user_tg_id, category_id, user_sub_category, ExpenseSubCategory)
             expenses.sub_category = sub_categories[-1][0] + 1
 
     expenses.amount = int(params['amount'])
@@ -226,19 +229,35 @@ async def quick_add_to_expenses(params: dict):
     logging.info(f'запись {expenses.id} добавлена')
 
 
-async def get_user_revenues_in_time(message_author_id, time: timedelta):
+async def get_user_posts_in_time(message_author_id, time: timedelta, db_model: Union[Expense, Revenue]):
     user_db_id = await get_user_db_id(message_author_id)
     async with async_session() as db_sess:
-        revenues_cat_query = select(Revenue.amount, Revenue.category, Revenue.sub_category).where(
-            and_(datetime.now() - Revenue.date <= time, Revenue.user_id == user_db_id))
+        revenues_cat_query = select(db_model.amount, db_model.category, db_model.sub_category).where(
+            and_(datetime.now() - db_model.date <= time, db_model.user_id == user_db_id))
         revenues = (await db_sess.execute(revenues_cat_query)).all()
         return revenues
 
 
-async def get_user_expenses_in_time(message_author_id, time: timedelta):
+async def all_user_posts(message_author_id, db_model: Union[Expense, Revenue]):
     user_db_id = await get_user_db_id(message_author_id)
     async with async_session() as db_sess:
-        expenses_cat_query = select(Expense.amount, Expense.category, Expense.sub_category).where(
-            and_(datetime.now() - Expense.date <= time, Expense.user_id == user_db_id))
-        expenses = (await db_sess.execute(expenses_cat_query)).all()
-        return expenses
+        user_data_query = select(db_model.date, db_model.amount, db_model.category, db_model.sub_category).where(db_model.user_id == user_db_id)
+        data = (await db_sess.execute(user_data_query)).all()
+        return data
+
+
+async def get_user_current_day_post(message_author_id, current_day, db_model: Union[Expense, Revenue]):
+    user_db_id = await get_user_db_id(message_author_id)
+    async with async_session() as db_sess:
+        user_data_query = select(db_model.date, db_model.amount, db_model.category, db_model.sub_category).where(and_(db_model.user_id == user_db_id, db_model.date == current_day))
+        data = (await db_sess.execute(user_data_query)).all()
+        return data
+
+
+async def get_user_current_segment_posts(message_author_id, first_date, second_date, db_model: Union[Expense, Revenue]):
+    user_db_id = await get_user_db_id(message_author_id)
+    async with async_session() as db_sess:
+        user_data_query = select(db_model.date, db_model.amount, db_model.category, db_model.sub_category).where(
+            and_(db_model.user_id == user_db_id, db_model.date <= second_date, db_model.date >= first_date))
+        data = (await db_sess.execute(user_data_query)).all()
+        return data
