@@ -2,6 +2,17 @@ import matplotlib.pyplot as plt
 from random import choices
 
 
+async def form_data(data):
+    pass
+
+
+async def sum_same_categories(data):
+    result = {}
+    for amount, label in data:
+        result[label] = result.get(label, 0) + amount
+    return list(result.items())
+
+
 async def draw_circle_diagram(filename, labels: iter, percentages: iter, explode=None):
     labels = tuple(labels)
     percentages = tuple(percentages)

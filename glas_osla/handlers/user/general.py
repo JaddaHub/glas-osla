@@ -13,9 +13,6 @@ from glas_osla.keyboards.inline import (
 )
 from sqlalchemy import select
 
-from glas_osla.handlers.user.circles_diagrams import setup_circles_diagrams_handlers
-from glas_osla.handlers.user.graphics import setup_graphics_handlers
-
 
 # from glas_osla.handlers.user.reports import setup_reports_handlers
 
