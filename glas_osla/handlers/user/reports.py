@@ -2,7 +2,7 @@ from aiogram.dispatcher import Dispatcher
 from aiogram import types
 from aiogram.types import InputFile
 
-from glas_osla.keyboards.inline import keyboards
+from glas_osla.keyboards.inline import reports_keyboard
 
 
 async def get_reports(callback: types.CallbackQuery):

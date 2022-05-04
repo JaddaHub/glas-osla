@@ -6,13 +6,18 @@ from glas_osla.db import db_commands
 from glas_osla.db.models.users_md import User
 from glas_osla.filters.is_client import ClientFilter
 from glas_osla.templates import general_phrases
-from glas_osla.keyboards.inline import general_keyboards as keyboards, expenses_keyboards as ex_keyboards, \
+from glas_osla.keyboards.inline import (
+    general_keyboards as keyboards,
+    expenses_keyboards as ex_keyboards,
     revenues_keyboards as re_keyboards
+)
 from sqlalchemy import select
 
 from glas_osla.handlers.user.circles_diagrams import setup_circles_diagrams_handlers
 from glas_osla.handlers.user.graphics import setup_graphics_handlers
-from glas_osla.handlers.user.reports import setup_reports_handlers
+
+
+# from glas_osla.handlers.user.reports import setup_reports_handlers
 
 
 async def profile(callback: types.CallbackQuery):
@@ -67,6 +72,8 @@ def setup_general_handlers(dp: Dispatcher):
     dp.register_message_handler(show_menu, ClientFilter(True), commands='menu')
     dp.register_message_handler(show_quick_info, ClientFilter(True), commands='quick')
     dp.register_callback_query_handler(profile, ClientFilter(True), text='get_profile')
-    dp.register_callback_query_handler(show_expenses_categories, ClientFilter(True), text='get_expenses')
-    dp.register_callback_query_handler(show_revenues_categories, ClientFilter(True), text='get_revenues')
+    dp.register_callback_query_handler(show_expenses_categories, ClientFilter(True),
+                                       text='get_expenses')
+    dp.register_callback_query_handler(show_revenues_categories, ClientFilter(True),
+                                       text='get_revenues')
     dp.register_callback_query_handler(profile_back_to_menu, text='profile_back_to_menu')

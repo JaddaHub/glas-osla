@@ -7,6 +7,7 @@ from glas_osla.states.RegStates import RegistrationStates
 from glas_osla.db.models.users_md import User
 from glas_osla.db.base import async_session
 from glas_osla.keyboards.inline import expenses_keyboards
+from glas_osla.keyboards.inline import general_keyboards
 
 
 async def warn_to_reg(message: types.Message):
@@ -38,7 +39,7 @@ async def get_person_type(message: types.Message, state: FSMContext):
             db_sess.add(new_user)
         await db_sess.commit()
     logging.info(f"{new_user} добавлен!")
-    await message.answer(thanks, reply_markup=keyboards.board_menu_keyboard)
+    await message.answer(thanks, reply_markup=general_keyboards.board_menu_keyboard)
     await state.finish()
 
 
