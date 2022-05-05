@@ -4,7 +4,7 @@ from aiogram.dispatcher import Dispatcher
 from aiogram import types
 from aiogram.types import InputFile
 
-from glas_osla.db.db_commands import get_user_in_time, get_category_name, get_sub_category_name
+from glas_osla.db.db_commands import get_user_posts_in_time, get_category_name, get_sub_category_name
 from glas_osla.db.models.expenses_md import Expense
 from glas_osla.db.models.expenses_plots_md import ExpenseSubCategory, ExpenseCategory
 from glas_osla.db.models.revenues_md import Revenue
@@ -29,8 +29,8 @@ async def get_expenses_graphics(callback: types.CallbackQuery):
 
 async def show_week_graphic(callback: types.CallbackQuery):
     time = timedelta(days=7)
-    revenues = await get_user_revenues_in_time(callback.from_user.id, time)
-    expenses = await get_user_expenses_in_time(callback.from_user.id, time)
+    revenues = await get_user_posts_in_time(callback.from_user.id, time, Revenue)
+    expenses = await get_user_posts_in_time(callback.from_user.id, time, Expense)
 
     revenues = [[i[0]] + [await get_category_name(i[1], RevenueCategory)] + [
         await get_sub_category_name(i[2], RevenueSubCategory)] for i in revenues]
