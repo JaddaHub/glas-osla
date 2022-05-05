@@ -5,13 +5,17 @@ from aiogram import types
 from aiogram.types import InputFile
 from aiogram.dispatcher import Dispatcher, filters
 
-from glas_osla.db.db_commands import get_user_posts_in_time, get_category_name, get_sub_category_name
+from glas_osla.db.db_commands import (
+    get_user_posts_in_time, get_category_name,
+    get_sub_category_name, get_sub_category_amount_in_time
+)
 from glas_osla.db.models.expenses_md import Expense
 from glas_osla.db.models.expenses_plots_md import ExpenseSubCategory
 from glas_osla.db.models.revenues_md import Revenue
 from glas_osla.db.models.revenues_plots_md import RevenueSubCategory
 from glas_osla.templates.graphics_phrases import *
 from glas_osla.keyboards.inline.graphics_keyboards import *
+from glas_osla.utils.cirlces_diagrams import form_data, sum_same_categories
 
 from glas_osla.utils.graphics import draw_graphic
 
@@ -48,28 +52,33 @@ async def show_graphic(callback: types.CallbackQuery):
     data = None
     if data_type == 'r':
         if category == 'all':
-            data = [[i[0]] + [await get_category_name(i[1], RevenueCategory)] + [
-                await get_sub_category_name(i[2], RevenueSubCategory)] for i in
+            data = [[i[0]] + [await get_category_name(i[1], RevenueCategory)] for i in
                     await get_user_posts_in_time(callback.from_user.id, time, Revenue)]
         else:
             data = await get_user_subcategories(callback.from_user.id, int(category),
                                                 RevenueSubCategory)
+            data = [[await get_sub_category_amount_in_time(callback.from_user.id, i[0], time,
+                                                           Revenue)] + [i[1]] for i in data]
+            data = await form_data(data)
     elif data_type == 'e':
         if category == 'all':
-            data = [[i[0]] + [await get_category_name(i[1], ExpenseCategory)] + [
-                await get_sub_category_name(i[2], ExpenseSubCategory)] for i in
-                    await get_user_posts_in_time(callback.from_user.id, time, Expense)]
-        else:
-            data = await get_user_subcategories(callback.from_user.id, int(category),
-                                                ExpenseSubCategory)
+            if category == 'all':
+                data = [[i[0]] + [await get_category_name(i[1], ExpenseCategory)] for i in
+                        await get_user_posts_in_time(callback.from_user.id, time, Expense)]
+            else:
+                data = await get_user_subcategories(callback.from_user.id, int(category),
+                                                    ExpenseSubCategory)
+                data = [[await get_sub_category_amount_in_time(callback.from_user.id, i[0], time,
+                                                               Expense)] + [i[1]] for i in data]
+                data = await form_data(data)
     if not data:
         await callback.message.answer(no_data_text)
         return
 
-    print(data)
-    filename = f'../../glas_osla/resources/img/graphics/{callback.from_user.id}_{data_type}_{category}_{int(datetime.now().microsecond)}.png'
+    filename = f'glas_osla/resources/img/graphics/{callback.from_user.id}_{data_type}_{category}_{int(datetime.now().microsecond)}.png'
 
-    await draw_graphic(filename, (i[1] for i in data), (i[0] for i in data))
+    data = await sum_same_categories(data)
+    await draw_graphic(filename, (i[0] for i in data), (i[1] for i in data))
     photo = InputFile(filename)
     await callback.bot.send_photo(callback.from_user.id, photo=photo, caption=your_graphic,
                                   reply_markup=show_keyboard)

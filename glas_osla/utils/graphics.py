@@ -1,12 +1,10 @@
 import matplotlib.pyplot as plt
 
 
-def draw_graphic(filename, amounts, dates):
-    pass
-
-# plt.plot(x, y1, x, y2)
-# plt.show()
-
-
-if __name__ == '__main__':
-    draw_graphic('test.png')
+async def draw_graphic(filename, amounts: iter, dates: iter):
+    amounts = tuple(amounts)
+    dates = tuple(dates)
+    print(amounts)
+    print(dates)
+    plt.plot(*zip(amounts, dates))
+    plt.savefig(filename)
