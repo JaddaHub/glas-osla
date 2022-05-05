@@ -150,7 +150,11 @@ async def get_sub_category_name(
         sub_category_id, db_model: Union[ExpenseSubCategory, RevenueSubCategory]):
     async with async_session() as db_sess:
         sub_cat_query = select(db_model.name).where(db_model.id == sub_category_id)
-        sub_cat_name = (await db_sess.execute(sub_cat_query)).first()[0]
+        sub_cat_name = (await db_sess.execute(sub_cat_query)).first()
+        if sub_cat_name:
+            sub_cat_name = sub_cat_name[0]
+        else:
+            sub_cat_name = 'Без названия'
         return sub_cat_name
 
 

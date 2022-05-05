@@ -6,12 +6,15 @@ from glas_osla.db.models.revenues_plots_md import RevenueCategory, RevenueSubCat
 async def make_deduction(user_data: list, stat_type):
     categories = {}
     print(user_data)
-    if not user_data:
-        return
     for post in user_data:
-        amount, cat, sub_cat = post
+        if len(post) == 2:
+            sub_cat = None
+        else:
+            sub_cat = post[-1]
+        amount, cat = post[:2]
         cat = str(cat)
-        sub_cat = str(sub_cat)
+        if sub_cat:
+            sub_cat = str(sub_cat)
         categories.setdefault(cat, {'result': 0, 'sub_categories': {}})
         categories[cat]['sub_categories'].setdefault('Без названия', 0)
         if sub_cat is None:
@@ -48,13 +51,17 @@ async def make_deduction(user_data: list, stat_type):
     most_sub_category_in_category_amount = sorted_categories[most_category]['sub_categories'][
         most_sub_category_in_category]
     if stat_type == 'e':
-        most_category = await db_commands.get_category_name(int(most_category), ExpenseCategory)
-        most_sub_category_in_category = await db_commands.get_sub_category_name(int(most_sub_category_in_category),
-                                                                                ExpenseSubCategory)
-        most_sub_category_at_all = await db_commands.get_sub_category_name(int(most_sub_category_at_all),
-                                                                           ExpenseSubCategory)
-        most_sub_category_at_all_parent = await db_commands.get_category_name(int(most_sub_category_at_all_parent),
-                                                                              ExpenseCategory)
+        if most_category.isdigit():
+            most_category = await db_commands.get_category_name(int(most_category), ExpenseCategory)
+        if most_sub_category_in_category.isdigit():
+            most_sub_category_in_category = await db_commands.get_sub_category_name(int(most_sub_category_in_category),
+                                                                                    ExpenseSubCategory)
+        if most_sub_category_at_all.isdigit():
+            most_sub_category_at_all = await db_commands.get_sub_category_name(int(most_sub_category_at_all),
+                                                                               ExpenseSubCategory)
+        if most_sub_category_at_all_parent.isdigit():
+            most_sub_category_at_all_parent = await db_commands.get_category_name(int(most_sub_category_at_all_parent),
+                                                                                  ExpenseCategory)
         result = f"Наиболее расходная категория: {most_category}.\n" \
                  f"Вы на неё потратили: {most_category_amount} рублей.\n\n" \
                  f"В ней больше всего тратила подкатегория: {most_sub_category_in_category}\n" \
