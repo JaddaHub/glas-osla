@@ -64,12 +64,14 @@ async def show_circle_diagram(callback: types.CallbackQuery):
             data = await form_data(data)
     elif data_type == 'e':
         if category == 'all':
-            data = [[i[0]] + [await get_category_name(i[1], ExpenseCategory)] + [
-                await get_sub_category_name(i[2], ExpenseSubCategory)] for i in
+            data = [[i[0]] + [await get_category_name(i[1], ExpenseCategory)] for i in
                     await get_user_posts_in_time(callback.from_user.id, time, Expense)]
         else:
-            data = await get_user_subcategories(callback.from_user.id, category,
+            data = await get_user_subcategories(callback.from_user.id, int(category),
                                                 ExpenseSubCategory)
+            data = [[await get_sub_category_amount_in_time(callback.from_user.id, i[0], time,
+                                                           Expense)] + [i[1]] for i in data]
+            data = await form_data(data)
     if not data:
         await callback.message.answer(no_data_text)
         return
