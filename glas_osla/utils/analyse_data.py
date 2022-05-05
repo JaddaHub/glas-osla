@@ -5,7 +5,7 @@ from glas_osla.db.models.revenues_plots_md import RevenueCategory, RevenueSubCat
 
 async def make_deduction(user_data: list, stat_type):
     categories = {}
-
+    print(user_data)
     for post in user_data:
         amount, cat, sub_cat = post
         cat = str(cat)
