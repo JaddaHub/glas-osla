@@ -271,7 +271,8 @@ async def get_user_posts_in_time(message_author_id, time: timedelta, db_model: U
 async def all_user_posts(message_author_id, db_model: Union[Expense, Revenue]):
     user_db_id = await get_user_db_id(message_author_id)
     async with async_session() as db_sess:
-        user_data_query = select(db_model.date, db_model.amount, db_model.category, db_model.sub_category).where(db_model.user_id == user_db_id)
+        user_data_query = select(db_model.date, db_model.amount, db_model.category, db_model.sub_category).where(
+            db_model.user_id == user_db_id)
         data = (await db_sess.execute(user_data_query)).all()
         return data
 
@@ -279,7 +280,8 @@ async def all_user_posts(message_author_id, db_model: Union[Expense, Revenue]):
 async def get_user_current_day_post(message_author_id, current_day, db_model: Union[Expense, Revenue]):
     user_db_id = await get_user_db_id(message_author_id)
     async with async_session() as db_sess:
-        user_data_query = select(db_model.date, db_model.amount, db_model.category, db_model.sub_category).where(and_(db_model.user_id == user_db_id, db_model.date == current_day))
+        user_data_query = select(db_model.date, db_model.amount, db_model.category, db_model.sub_category).where(
+            and_(db_model.user_id == user_db_id, db_model.date == current_day))
         data = (await db_sess.execute(user_data_query)).all()
         return data
 
