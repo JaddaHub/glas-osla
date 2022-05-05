@@ -74,7 +74,7 @@ async def show_graphic(callback: types.CallbackQuery):
     if not data:
         await callback.message.answer(no_data_text)
         return
-
+    print(data)
     filename = f'glas_osla/resources/img/graphics/{callback.from_user.id}_{data_type}_{category}_{int(datetime.now().microsecond)}.png'
 
     data = await sum_same_categories(data)

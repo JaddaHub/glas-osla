@@ -1,0 +1,5 @@
+aiogram~=2.20
+SQLAlchemy~=1.4.36
+python-dotenv~=0.20.0
+matplotlib~=3.5.2
+asyncpg~=0.25.0

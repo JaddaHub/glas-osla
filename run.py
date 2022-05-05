@@ -36,7 +36,7 @@ async def main():
     storage = MemoryStorage()
     dp = Dispatcher(bot, storage=storage)
 
-    # await base.init_models()
+    await base.init_models()
     register_all_filters(dp)
     register_all_handlers(dp)
 

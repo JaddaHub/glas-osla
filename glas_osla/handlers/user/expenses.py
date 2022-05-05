@@ -93,7 +93,7 @@ async def delete_category(callback: types.CallbackQuery):
 
 async def change_sub_category(callback: types.CallbackQuery):
     current_sub_category_id = int(callback.data.split('_')[-1])
-    current_sub_category_name = await db_commands.get_sub_category_name(current_sub_category_id, ExpenseSubCategory)
+    current_sub_category_name = await db_commands.get_sub_category_name(callback.from_user.id, current_sub_category_id, ExpenseSubCategory)
     change_or_delete_expenses_sub_category_keyboard = await ex_keyboards.change_or_delete_expenses_sub_category(
         current_sub_category_id)
     await callback.message.edit_text(f'{edit_or_delete_sub_cat_text} {current_sub_category_name}?',

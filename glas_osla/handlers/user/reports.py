@@ -72,7 +72,7 @@ async def get_special_date(message: types.Message, state: FSMContext):
                                                                      db_model)
     another_models = help_dict[db_model]
     reply = '\n'.join([
-        f'{post[0]} {post[1]} {await db_commands.get_category_name(post[2], another_models[0])} {await db_commands.get_sub_category_name(post[3], another_models[1])}'
+        f'{post[0]} {post[1]} {await db_commands.get_category_name(post[2], another_models[0])} {await db_commands.get_sub_category_name(message.from_user.id, post[3], another_models[1])}'
         for post in user_data])
     if len(reply) == 0:
         reply = 'Нет данных'
@@ -105,7 +105,7 @@ async def get_full_statistic(callback: types.CallbackQuery):
     reply = ""
     for post in user_data:
         print(post[2], post[3])
-        reply += f'{post[0]} {post[1]} {await db_commands.get_category_name(post[2], another_models[0])} {await db_commands.get_sub_category_name(post[3], another_models[1])}\n'
+        reply += f'{post[0]} {post[1]} {await db_commands.get_category_name(post[2], another_models[0])} {await db_commands.get_sub_category_name(callback.from_user.id, post[3], another_models[1])}\n'
     keyboard = await stat_keyboards.back_to_profile_keyboard()
     if len(reply) == 0:
         reply = 'Нет данных'
@@ -136,7 +136,7 @@ async def get_quick_statistic(callback: types.CallbackQuery):
     elif stat_type == 'r':
         db_model = Revenue
     user_data = await db_commands.get_user_posts_in_time(callback.from_user.id, delta, db_model)
-    deduce = await make_deduction(user_data, stat_type)
+    deduce = await make_deduction(user_data, stat_type, callback.from_user.id)
     keyboard = await stat_keyboards.back_to_profile_keyboard()
     await callback.message.edit_text(deduce, reply_markup=keyboard)
 

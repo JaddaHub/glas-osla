@@ -57,6 +57,8 @@ async def show_circle_diagram(callback: types.CallbackQuery):
             data = [[i[0]] + [await get_category_name(i[1], RevenueCategory)] for i in
                     await get_user_posts_in_time(callback.from_user.id, time, Revenue)]
         else:
+            await callback.answer('Временно недоступно из-за частого использования')
+            return
             data = await get_user_subcategories(callback.from_user.id, int(category),
                                                 RevenueSubCategory)
             data = [[await get_sub_category_amount_in_time(callback.from_user.id, i[0], time,
@@ -67,6 +69,8 @@ async def show_circle_diagram(callback: types.CallbackQuery):
             data = [[i[0]] + [await get_category_name(i[1], ExpenseCategory)] for i in
                     await get_user_posts_in_time(callback.from_user.id, time, Expense)]
         else:
+            await callback.answer('Временно недоступно из-за частого использования')
+            return
             data = await get_user_subcategories(callback.from_user.id, int(category),
                                                 ExpenseSubCategory)
             data = [[await get_sub_category_amount_in_time(callback.from_user.id, i[0], time,

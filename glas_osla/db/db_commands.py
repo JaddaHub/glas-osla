@@ -45,6 +45,8 @@ async def get_user_subcategories(
         sub_cat_query = select(db_model.id, db_model.name).where(
             and_(db_model.user_id == user_db_id, db_model.parent == category_id))
         sub_categories = (await db_sess.execute(sub_cat_query)).all()
+        if not sub_categories:
+            return
         return sub_categories
 
 
@@ -139,17 +141,22 @@ async def add_sub_category(
         await db_sess.commit()
 
 
-async def get_category_id(category_name, db_model: Union[ExpenseCategory, RevenueCategory]):
+async def get_category_id(user_tg_id, category_name, db_model: Union[ExpenseCategory, RevenueCategory]):
+    user_db_id = await get_user_db_id(user_tg_id)
     async with async_session() as db_sess:
-        cat_query = select(db_model.id).where(db_model.name == category_name)
-        cat_id = (await db_sess.execute(cat_query)).first()[0]
-        return cat_id
+        cat_query = select(db_model.id).where(and_(user_db_id == db_model.user_id, db_model.name == category_name))
+        cat_id = (await db_sess.execute(cat_query)).first()
+        if not cat_id:
+            return
+        return cat_id[0]
 
 
-async def get_sub_category_name(
-        sub_category_id, db_model: Union[ExpenseSubCategory, RevenueSubCategory]):
+async def get_sub_category_name(message_from_user_id,
+                                sub_category_id, db_model: Union[ExpenseSubCategory, RevenueSubCategory]):
+    db_user_id = await get_user_db_id(message_from_user_id)
     async with async_session() as db_sess:
-        sub_cat_query = select(db_model.name).where(db_model.id == sub_category_id)
+        sub_cat_query = select(db_model.name).where(
+            and_(db_model.id == sub_category_id, db_model.user_id == db_user_id))
         sub_cat_name = (await db_sess.execute(sub_cat_query)).first()
         if sub_cat_name:
             sub_cat_name = sub_cat_name[0]
@@ -182,28 +189,14 @@ async def quick_add_to_revenues(params: dict):
     user_category = params['category']
     user_sub_category = params.get('sub_category')
 
-    categories = await get_user_categories(user_tg_id, RevenueCategory)
-    if not categories:
-        categories = [(0, 0)]
-    for id, category in categories:
-        if category == user_category:
-            category_id = revenue.category = id
-            break
+    category_id = await get_category_id(user_tg_id, user_category, RevenueCategory)
+    if category_id:
+        revenue.category = category_id
     else:
         await add_category(user_tg_id, user_category, RevenueCategory)
-        category_id = revenue.category = categories[-1][0] + 1
-
-    sub_categories = await get_user_subcategories(user_tg_id, category_id, RevenueSubCategory)
-    if not sub_categories:
-        sub_categories = [(0, 0)]
-
+        revenue.category = await get_category_id(user_tg_id, user_category, RevenueCategory)
     if user_sub_category:
-        for id, sub_category in sub_categories:
-            if sub_category == user_sub_category:
-                break
-        else:
-            await add_sub_category(user_tg_id, category_id, user_sub_category, RevenueSubCategory)
-        revenue.sub_category = await get_sub_category_id(user_tg_id, category_id, user_sub_category,
+        revenue.sub_category = await get_sub_category_id(user_tg_id, revenue.category, user_sub_category,
                                                          RevenueSubCategory)
 
     revenue.amount = int(params['amount'])
@@ -225,31 +218,15 @@ async def quick_add_to_expenses(params: dict):
     user_category = params['category']
     user_sub_category = params.get('sub_category')
 
-    categories = await get_user_categories(user_tg_id, ExpenseCategory)
-    if not categories:
-        categories = [(0, 0)]
-    for id, category in categories:
-        if category == user_category:
-            category_id = expense.category = id
-            break
+    category_id = await get_category_id(user_tg_id, user_category, ExpenseCategory)
+    if category_id:
+        expense.category = category_id
     else:
         await add_category(user_tg_id, user_category, ExpenseCategory)
-        category_id = expense.category = categories[-1][0] + 1
-
-    sub_categories = await get_user_subcategories(user_tg_id, category_id, ExpenseSubCategory)
-    if not sub_categories:
-        sub_categories = [(0, 0)]
-
+        expense.category = await get_category_id(user_tg_id, user_category, ExpenseCategory)
     if user_sub_category:
-        for id, sub_category in sub_categories:
-            if sub_category == user_sub_category:
-                break
-        else:
-            await add_sub_category(user_tg_id, category_id, user_sub_category, ExpenseSubCategory)
-            expense.sub_category = await get_sub_category_id(user_tg_id, category_id,
-                                                             user_sub_category,
-                                                             ExpenseSubCategory)
-
+        expense.sub_category = await get_sub_category_id(user_tg_id, expense.category, user_sub_category,
+                                                         ExpenseSubCategory)
     expense.amount = int(params['amount'])
     expense.note = params.get('note')
     async with async_session() as db_sess:

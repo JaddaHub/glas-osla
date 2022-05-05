@@ -3,7 +3,7 @@ from glas_osla.db.models.expenses_plots_md import ExpenseCategory, ExpenseSubCat
 from glas_osla.db.models.revenues_plots_md import RevenueCategory, RevenueSubCategory
 
 
-async def make_deduction(user_data: list, stat_type):
+async def make_deduction(user_data: list, stat_type, message_author_id):
     categories = {}
     print(user_data)
     for post in user_data:
@@ -54,10 +54,10 @@ async def make_deduction(user_data: list, stat_type):
         if most_category.isdigit():
             most_category = await db_commands.get_category_name(int(most_category), ExpenseCategory)
         if most_sub_category_in_category.isdigit():
-            most_sub_category_in_category = await db_commands.get_sub_category_name(int(most_sub_category_in_category),
+            most_sub_category_in_category = await db_commands.get_sub_category_name(message_author_id, int(most_sub_category_in_category),
                                                                                     ExpenseSubCategory)
         if most_sub_category_at_all.isdigit():
-            most_sub_category_at_all = await db_commands.get_sub_category_name(int(most_sub_category_at_all),
+            most_sub_category_at_all = await db_commands.get_sub_category_name(message_author_id, int(most_sub_category_at_all),
                                                                                ExpenseSubCategory)
         if most_sub_category_at_all_parent.isdigit():
             most_sub_category_at_all_parent = await db_commands.get_category_name(int(most_sub_category_at_all_parent),
@@ -71,9 +71,9 @@ async def make_deduction(user_data: list, stat_type):
 
     elif stat_type == 'r':
         most_category = await db_commands.get_category_name(int(most_category), RevenueCategory)
-        most_sub_category_in_category = await db_commands.get_sub_category_name(int(most_sub_category_in_category),
+        most_sub_category_in_category = await db_commands.get_sub_category_name(message_author_id, int(most_sub_category_in_category),
                                                                                 RevenueSubCategory)
-        most_sub_category_at_all = await db_commands.get_sub_category_name(int(most_sub_category_at_all),
+        most_sub_category_at_all = await db_commands.get_sub_category_name(message_author_id, int(most_sub_category_at_all),
                                                                            RevenueSubCategory)
         most_sub_category_at_all_parent = await db_commands.get_category_name(int(most_sub_category_at_all_parent),
                                                                               RevenueCategory)
