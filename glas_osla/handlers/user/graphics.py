@@ -5,7 +5,6 @@ from aiogram import types
 from aiogram.types import InputFile
 from aiogram.dispatcher import Dispatcher, filters
 
-from glas_osla.db.db_commands import get_category_name, get_sub_category_name, get_user_in_time
 from glas_osla.db.db_commands import get_user_posts_in_time, get_category_name, get_sub_category_name
 from glas_osla.db.models.expenses_md import Expense
 from glas_osla.db.models.expenses_plots_md import ExpenseSubCategory
@@ -51,7 +50,7 @@ async def show_graphic(callback: types.CallbackQuery):
         if category == 'all':
             data = [[i[0]] + [await get_category_name(i[1], RevenueCategory)] + [
                 await get_sub_category_name(i[2], RevenueSubCategory)] for i in
-                    await get_user_in_time(callback.from_user.id, time, Revenue)]
+                    await get_user_posts_in_time(callback.from_user.id, time, Revenue)]
         else:
             data = await get_user_subcategories(callback.from_user.id, int(category),
                                                 RevenueSubCategory)
@@ -59,7 +58,7 @@ async def show_graphic(callback: types.CallbackQuery):
         if category == 'all':
             data = [[i[0]] + [await get_category_name(i[1], ExpenseCategory)] + [
                 await get_sub_category_name(i[2], ExpenseSubCategory)] for i in
-                    await get_user_in_time(callback.from_user.id, time, Expense)]
+                    await get_user_posts_in_time(callback.from_user.id, time, Expense)]
         else:
             data = await get_user_subcategories(callback.from_user.id, int(category),
                                                 ExpenseSubCategory)

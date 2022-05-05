@@ -14,7 +14,7 @@ from glas_osla.db.db_commands import (
     get_user_posts_in_time, get_category_name, get_sub_category_name,
     get_user_posts_in_time,
     get_category_name, get_category_name, get_sub_category_name,
-    get_sub_category_name, get_user_subcategories
+    get_sub_category_name, get_user_subcategories, get_sub_category_amount_in_time
 )
 from glas_osla.utils.cirlces_diagrams import draw_circle_diagram, sum_same_categories, form_data
 

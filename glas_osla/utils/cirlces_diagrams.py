@@ -3,7 +3,7 @@ from random import choices
 
 
 async def form_data(data):
-    pass
+    return [[sum(j[0] for j in i[0]), i[1]] for i in data]
 
 
 async def sum_same_categories(data):
