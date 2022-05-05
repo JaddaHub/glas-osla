@@ -1,26 +1,25 @@
-import logging
 import os
 from datetime import timedelta, datetime
 
-import aiogram.dispatcher.filters.state
-from aiogram.dispatcher import Dispatcher, filters, FSMContext
+from aiogram.dispatcher import Dispatcher, filters
 from aiogram import types
 from aiogram.types import InputFile
 
 from glas_osla.db.models.expenses_md import Expense
-from glas_osla.db.models.expenses_plots_md import ExpenseCategory, ExpenseSubCategory
+from glas_osla.db.models.expenses_plots_md import ExpenseSubCategory
 from glas_osla.db.models.revenues_md import Revenue
-from glas_osla.db.models.revenues_plots_md import RevenueCategory, RevenueSubCategory
-from glas_osla.filters import ClientFilter
-from glas_osla.keyboards.inline import general_keyboards
+from glas_osla.db.models.revenues_plots_md import RevenueSubCategory
 
 from glas_osla.db.db_commands import (
+    get_user_posts_in_time, get_category_name, get_sub_category_name,
     get_user_posts_in_time,
     get_category_name, get_category_name, get_sub_category_name,
     get_sub_category_name, get_user_subcategories
 )
-from glas_osla.keyboards.inline import circles_diagrams_keyboards
-from glas_osla.utils.cirlces_diagrams import draw_circle_diagram
+from glas_osla.utils.cirlces_diagrams import draw_circle_diagram, sum_same_categories, form_data
+
+from glas_osla.templates.circles_diagrams_phrases import *
+from glas_osla.keyboards.inline.circles_diagrams_keyboards import *
 
 
 async def get_callback_data(callback: types.CallbackQuery):
@@ -32,21 +31,19 @@ async def send_callback_data(callback: types.CallbackQuery):
 
 
 async def get_circles_diagrams(callback: types.CallbackQuery):
-    await callback.message.edit_text('Выберите о чем построить диаграмму',
-                                     reply_markup=circles_diagrams_keyboards.ask_keyboard)
+    await callback.message.edit_text(choose_data_type, reply_markup=ask_keyboard)
 
 
 async def get_category_for_circles_diagrams(callback: types.CallbackQuery):
-    await callback.message.edit_text('Выберите о чем построить диаграмму',
-                                     reply_markup=await circles_diagrams_keyboards.categories_keyboard(
-                                         callback.from_user.id,
-                                         await send_callback_data(callback)))
+    await callback.message.edit_text(choose_data_type,
+                                     reply_markup=await categories_keyboard(callback.from_user.id,
+                                                                            await send_callback_data(
+                                                                                callback)))
 
 
 async def get_time_for_circles_diagrams(callback: types.CallbackQuery):
-    await callback.message.edit_text('Выберите отрезок времени для диаграммы',
-                                     reply_markup=await circles_diagrams_keyboards.time_keyboard(
-                                         await send_callback_data(callback)))
+    await callback.message.edit_text(choose_time, reply_markup=await time_keyboard(
+        await send_callback_data(callback)))
 
 
 async def show_circle_diagram(callback: types.CallbackQuery):
@@ -57,30 +54,33 @@ async def show_circle_diagram(callback: types.CallbackQuery):
     data = None
     if data_type == 'r':
         if category == 'all':
-            data = [[i[0]] + [await get_category_name(i[1], RevenueCategory)] + [
-                await get_sub_category_name(i[2], RevenueSubCategory)] for i in
+            data = [[i[0]] + [await get_category_name(i[1], RevenueCategory)] for i in
                     await get_user_posts_in_time(callback.from_user.id, time, Revenue)]
         else:
             data = await get_user_subcategories(callback.from_user.id, int(category),
                                                 RevenueSubCategory)
+            data = [[await get_sub_category_amount_in_time(callback.from_user.id, i[0], time,
+                                                           Revenue)] + [i[1]] for i in data]
+            data = await form_data(data)
     elif data_type == 'e':
         if category == 'all':
             data = [[i[0]] + [await get_category_name(i[1], ExpenseCategory)] + [
                 await get_sub_category_name(i[2], ExpenseSubCategory)] for i in
                     await get_user_posts_in_time(callback.from_user.id, time, Expense)]
         else:
-            data = await get_user_subcategories(callback.from_user.id, int(category),
+            data = await get_user_subcategories(callback.from_user.id, category,
                                                 ExpenseSubCategory)
     if not data:
-        await callback.message.answer('Нет данных')
+        await callback.message.answer(no_data_text)
         return
 
-    filename = f'glas_osla/resources/img/circles_diagrams/{callback.from_user.id}_{data_type}_{category}_{datetime.now().microsecond}.png'
+    filename = f'glas_osla/resources/img/circles_diagrams/{callback.from_user.id}_{data_type}_{category}_{int(datetime.now().microsecond)}.png'
 
-    await draw_circle_diagram(filename, (i[1] for i in data), (i[0] for i in data))
+    data = await sum_same_categories(data)
+    await draw_circle_diagram(filename, (i[0] for i in data), (i[1] for i in data))
     photo = InputFile(filename)
-    await callback.bot.send_photo(callback.from_user.id, photo=photo, caption='Ваша диаграмма',
-                                  reply_markup=circles_diagrams_keyboards.show_keyboard)
+    await callback.bot.send_photo(callback.from_user.id, photo=photo, caption=your_diagram,
+                                  reply_markup=show_keyboard)
     os.remove(filename)
 
 

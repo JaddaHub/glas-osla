@@ -14,9 +14,10 @@ from glas_osla.templates.general_phrases import *
 async def add_to_history(message: types.Message):
     try:
         arguments = message.text.split()[1:]
+        int(arguments[0])
         if len(arguments) > 4:
             raise IndexError
-    except IndexError:
+    except (IndexError, ValueError):
         await message.answer('Введены неверные аргументы\n/quick - информация о быстрой команде')
         return
 
